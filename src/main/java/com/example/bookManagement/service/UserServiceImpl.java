@@ -8,7 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.example.bookManagement.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserDetailsService {
@@ -18,12 +22,21 @@ public class UserServiceImpl implements UserDetailsService {
             "user with email %s not found";
 	
 	@Override
-    public UserDetails loadUserByUsername(String email)
-            throws UsernameNotFoundException {
-        return userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
-    }
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+//        return userRepo.findByEmail(email)
+//                .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
+//    
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found with username or email:" + email));
+         return user;
 	
+	
+	}
+	
+	private  GrantedAuthority mapRolesToAuthorities(UserRole role){
+        return new SimpleGrantedAuthority(role.name());
+    }
 	
 	
 	@Autowired
