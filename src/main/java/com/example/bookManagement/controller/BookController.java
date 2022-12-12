@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +28,16 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.example.bookManagement.model.Book;
 import com.example.bookManagement.model.User;
 import com.example.bookManagement.model.UserRole;
-import com.example.bookManagement.service.UserServiceImpl;
+import com.example.bookManagement.repository.BookRepository;
+import com.example.bookManagement.service.BookService;
 
 import lombok.var;
 
 import org.springframework.http.ResponseCookie;
-//import com.example.bookManagement.security.config.TokenProvider;
-//import com.example.bookManagement.model.AuthToken;
 import org.springframework.http.HttpStatus;
 
 
@@ -44,22 +46,29 @@ import org.springframework.http.HttpStatus;
 @CrossOrigin 
 public class BookController {
 	
+	@Autowired
+	private BookService bookService;
+	
+	@Autowired
+	private BookRepository bookRepo;
+	
 	@GetMapping(params = { "page", "size" })
-	public List<String> findPaginated(@RequestParam("page") int page, 
+	public List<Book> findPaginated(@RequestParam("page") int page, 
 	  @RequestParam("size") int size, UriComponentsBuilder uriBuilder,
 	  HttpServletResponse response) {
-		// First page with 5 items
-//        Pageable paging = PageRequest.of(
-//            0, 5, Sort.by("user").ascending());
-//        Page<UserEntity> page = data.findAll(paging);
-// 
-//        // Retrieve the items
-//        return page.getContent();
-		
-		List<String> list = new ArrayList<String>();
-		
-		list.add("test");
-		list.add("foo");
-		return list;
+	  
+		Pageable pagebleRequest = PageRequest.of(page, size, Sort.by("id").ascending());
+
+	    Page<Book> pageBooks =  bookRepo.findAll(pagebleRequest);
+	    
+
+	    return pageBooks.getContent();
+	
 	}
+	
+	@GetMapping("")
+	public List<Book> fetchBookList() {
+		return bookService.fetchBookList();
+	}
+	
 }
